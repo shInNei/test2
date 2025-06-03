@@ -1,0 +1,50 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.29.0'
+
+    - name: Build release APK
+      run: |
+        cd frontend
+        flutter build apk --release
+
+    - name: Upload Release to GitHub
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: "v1.0.${{ github.run_number }}"
+        name: Release v1.0.${{ github.run_number }}
+        files: |
+          frontend/build/app/outputs/flutter-apk/app-release.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Tag and push
+      run: |
+        cd frontend
+        VERSION="1.0.${{ github.run_number }}"
+        TAG_EXISTS=$(git ls-remote --tags origin refs/tags/v$VERSION)
+        if [ -z "$TAG_EXISTS" ]; then
+          sed -i "s/^version: .*/version: $VERSION/" pubspec.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "ci: bump version to $VERSION"
+          git tag "v$VERSION"
+          git push origin --tags
+        else
+          echo "Tag v$VERSION already exists, skipping tag push."
+        fi
