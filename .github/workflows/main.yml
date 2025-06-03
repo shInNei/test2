@@ -56,3 +56,4 @@ jobs:
           git push origin main --tags
         else
           echo "Tag v$VERSION already exists, skipping tag push."
+        fi
