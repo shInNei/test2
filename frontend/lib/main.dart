@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
     print('seenOnboarding: $seenOnboarding, loggedIn: $loggedIn');
     String initial = '/home';
     if (!seenOnboarding) {
-      initial = '/onboarding';
+      initial = '/test';
     } else if (!loggedIn) {
       initial = '/login';
     }
